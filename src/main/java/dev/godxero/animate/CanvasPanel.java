@@ -4,7 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CanvasPanel extends JPanel {
-	private final Drawer drawer = new Drawer(this);
+	private final Drawer drawer;
+
+	public CanvasPanel (JFrame parentFrame) {
+		this.drawer = new Drawer(parentFrame);
+	}
 
 	@Override
 	protected void paintComponent (Graphics g) {
