@@ -2,6 +2,13 @@
 
 This project implements the A* (A-star) pathfinding algorithm using Java Swing. The algorithm searches for the shortest path between the top-left and bottom-right corners of a grid, while considering obstacles and the option of diagonal movement. This project currently focuses on the animation and algorithm logic.
 
+### Visual Demonstration  
+
+A recorded animation of the algorithm in action is available:  
+[View GIF](/animation.gif)
+
+This keeps it simple and directs users to the file without embedding it visibly in the README. Let me know if you need further tweaks! 🚀
+
 ## Features
 
 - **Random Grid Generation:** Upon running the application, a random grid map is generated with some cells marked as obstacles.
