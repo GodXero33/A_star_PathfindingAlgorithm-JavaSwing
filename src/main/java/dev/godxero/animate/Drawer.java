@@ -6,11 +6,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Drawer {
-	private static Color[] COLORS = {
+	private static final Color[] COLORS = {
 		Color.WHITE,
 		Color.BLACK,
 		Color.GRAY
 	};
+	private static final double COST_DIAGONAL = 1.41;
+	private static final double COST_STRAIGHT = 1.0;
 
 	private final int cellWidth;
 	private final int cellHeight;
@@ -29,10 +31,10 @@ public class Drawer {
 	private final Set<Integer> walls;
 
 	public Drawer (JFrame parentFrame) {
-		this.width = 500;
-		this.height = 500;
-		this.cols = 10;
-		this.rows = 10;
+		this.width = 1000;
+		this.height = 1000;
+		this.cols = 50;
+		this.rows = 50;
 		this.cellWidth = this.width / this.cols;
 		this.cellHeight = this.height / this.rows;
 		this.grid = new Node[this.rows][this.cols];
@@ -74,9 +76,15 @@ public class Drawer {
 	}
 
 	public void draw (Graphics g) {
-		g.setColor(Color.WHITE);
+		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, this.width, this.height);
+
 		this.drawGrid(g);
+
+		if (this.solved) {
+			this.drawPath(g);
+			return;
+		}
 
 		g.setColor(Color.RED);
 
@@ -135,15 +143,16 @@ public class Drawer {
 		for (final Node neighbor : neighbors) {
 			if (NodeArrays.includes(neighbor, this.closedList) || this.walls.contains(neighbor.getValue())) continue;
 
-			double tmpG = currentNode.getG() + 1;
+			final boolean isDiagonalNeighbor = currentNode.getX() != neighbor.getX() && currentNode.getY() != neighbor.getY();
+			final boolean isNeighborInOpenedList = NodeArrays.includes(neighbor, this.openedList);
+			final double tmpG = currentNode.getG() + (isDiagonalNeighbor ? Drawer.COST_DIAGONAL : Drawer.COST_STRAIGHT);
+			boolean isNewPath = !isNeighborInOpenedList || tmpG < neighbor.getG();
 
-			if (NodeArrays.includes(neighbor, this.openedList)) {
-				if (tmpG < neighbor.getG()) neighbor.setG(tmpG);
-			} else {
-				neighbor.setG(tmpG);
-				this.openedList = NodeArrays.push(neighbor, this.openedList);
-			}
+			if (!isNeighborInOpenedList) this.openedList = NodeArrays.push(neighbor, this.openedList);
 
+			if (!isNewPath) continue;
+
+			neighbor.setG(tmpG);
 			neighbor.setH(this.heuristic(neighbor, this.end));
 			neighbor.setF(neighbor.getG() + neighbor.getH());
 			neighbor.setPrevious(currentNode);
@@ -176,13 +185,11 @@ public class Drawer {
 	private void printPath () {
 		final StringBuilder builder = new StringBuilder();
 
-		builder.append("Start: ").append(this.start.toString()).append("\nPath: ");
+		builder.append("\nStart:\n").append(this.start.toString()).append("\n\nPath:\n");
 
-		for (final Node node : this.path) builder.append(node.toString()).append(" --> ");
+		for (final Node node : this.path) builder.append(node.toString()).append("\n");
 
-		if (this.path.length > 0) builder.delete(builder.length() - 5, builder.length());
-
-		builder.append("\nEnd: ").append(this.end.toString());
+		builder.append("\nEnd:\n").append(this.end.toString()).append("\n\nDistance: ").append(this.path.length).append("\n");
 
 		System.out.println(builder);
 	}

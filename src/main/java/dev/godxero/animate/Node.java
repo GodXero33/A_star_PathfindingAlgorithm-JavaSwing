@@ -33,7 +33,12 @@ public class Node {
 		if (this.y > 0) this.neighbors = NodeArrays.push(grid[this.y - 1][this.x], this.neighbors);
 		if (this.y < grid.length - 1) this.neighbors = NodeArrays.push(grid[this.y + 1][this.x], this.neighbors);
 
-		if (diagonal) {/* Will implement later */}
+		if (!diagonal) return;
+
+		if (this.x > 0 && this.y > 0) this.neighbors = NodeArrays.push(grid[this.y - 1][this.x - 1], this.neighbors);
+		if (this.x < grid[0].length - 1 && this.y > 0) this.neighbors = NodeArrays.push(grid[this.y - 1][this.x + 1], this.neighbors);
+		if (this.x > 0 && this.y < grid.length - 1) this.neighbors = NodeArrays.push(grid[this.y + 1][this.x - 1], this.neighbors);
+		if (this.x < grid[0].length - 1 && this.y < grid.length - 1) this.neighbors = NodeArrays.push(grid[this.y + 1][this.x + 1], this.neighbors);
 	}
 
 	@Override
