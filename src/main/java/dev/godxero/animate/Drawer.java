@@ -2,8 +2,16 @@ package dev.godxero.animate;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Drawer {
+	private static Color[] COLORS = {
+		Color.WHITE,
+		Color.BLACK,
+		Color.GRAY
+	};
+
 	private final int cellWidth;
 	private final int cellHeight;
 	private final int cols;
@@ -18,6 +26,7 @@ public class Drawer {
 	private Node end;
 	private final boolean diagonal;
 	private boolean solved;
+	private final Set<Integer> walls;
 
 	public Drawer (JFrame parentFrame) {
 		this.width = 500;
@@ -32,6 +41,10 @@ public class Drawer {
 		this.path = new Node[0];
 		this.diagonal = false;
 		this.solved = false;
+		this.walls = new HashSet<>();
+
+		this.walls.add(1);
+		this.walls.add(2);
 
 		parentFrame.getContentPane().setPreferredSize(new Dimension(this.width, this.height));
 		parentFrame.pack();
@@ -45,12 +58,19 @@ public class Drawer {
 			for (int y = 0; y < this.rows; y++)
 				this.grid[y][x] = new Node(x, y);
 
-		for (int x = 0; x < this.cols; x++)
-			for (int y = 0; y < this.rows; y++)
+		for (int x = 0; x < this.cols; x++) {
+			for (int y = 0; y < this.rows; y++) {
 				this.grid[y][x].calculateNeighbors(this.grid, this.diagonal);
+
+				if (Math.random() > 0.8) this.grid[y][x].setValue((int) (Math.random() * 2 + 1));
+			}
+		}
 
 		this.start = this.grid[0][0];
 		this.end = this.grid[this.rows - 1][this.cols - 1];
+
+		this.start.setValue(0);
+		this.end.setValue(0);
 	}
 
 	public void draw (Graphics g) {
@@ -83,7 +103,7 @@ public class Drawer {
 	private void drawGrid (Graphics g) {
 		for (int x = 0; x < this.cols; x++) {
 			for (int y = 0; y < this.rows; y++) {
-				g.setColor(Color.BLACK);
+				g.setColor(Drawer.COLORS[this.grid[y][x].getValue()]);
 				this.drawNode(g, x, y);
 			}
 		}
@@ -94,7 +114,13 @@ public class Drawer {
 	}
 
 	public void update () {
-		if (this.openedList.length == 0 || this.solved) return;
+		if (this.solved) return;
+
+		if (this.openedList.length == 0) {
+			this.solved = true;
+			System.out.println("No solution");
+			return;
+		}
 
 		int lowestFScoreIndexInOpenedList = 0;
 		double lowestFScore = this.openedList[lowestFScoreIndexInOpenedList].getF();
@@ -107,7 +133,7 @@ public class Drawer {
 		final Node[] neighbors = currentNode.getNeighbors();
 
 		for (final Node neighbor : neighbors) {
-			if (NodeArrays.includes(neighbor, this.closedList)) continue;
+			if (NodeArrays.includes(neighbor, this.closedList) || this.walls.contains(neighbor.getValue())) continue;
 
 			double tmpG = currentNode.getG() + 1;
 
